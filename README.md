@@ -1,8 +1,9 @@
 #Dynamic finder methods
->Aim of this article is to explain meta programming usage of gem mongoid dynamic finder.
+
+>The aim of this article is to explain the meta programming usage of the gem [Mongoid dynamic finder]
 
 
-There are many ways to use mongodb with rails, one of them is using Gem called [Mongoid]. Which will give you activerecord like usage models.
+There are many ways to use mongodb with rails, one of them is using a gem called [Mongoid] which will give you activerecord like usage models.
 
 ```sh
 class Artist
@@ -13,24 +14,24 @@ end
 
 syd = Artist.where(name: "Syd Vicious").between(age: 18..25).first
 ```
-if you would like to use activerecord like dynamic finders then you ll have to install gem called [Mongoid dynamic finder].
+If you would like to use activerecord like dynamic finders then you'll have to install the gem called [Mongoid dynamic finder].
 Just add the gem and bundle.
 
 ```sh
 Artist.find_by_name_and_title('Some Artist' , 'Mr.')
 ```
-So how does it work, today i ll explain how this dyanmic finders work by explaining mongoid dynamic finders gem.
+So how does it work? Today I'll explain how these dyanmic finders work by explaining the mongoid dynamic finders gem.
 
 -----------
 
-##Where magic happens
+##Where the magic happens
 
 ```sh
 def method_missing(method_id, *args, &block)
       conditions = {}
       bang = false
 ```
-Calling find_by_name method will end up here method missing, because there is not a method called by that name. Method_missing method initiates conditions hash and bang variable. method_id will be find_by_name and arguments will be 'Some Artist', 'Mr.'
+Calling the find_by_name method will end up here at method_missing because there is not a method called by that name. The method_missing method initiates the conditions hash and bang variable. Method_id will be find_by_name and arguments will be 'Some Artist', 'Mr.'
 
 ```sh
 1      case method_id.to_s
@@ -42,29 +43,19 @@ Calling find_by_name method will end up here method missing, because there is no
 7          conditions[attr] = args[i]
 8        end
 ```
- - line 1 turns method name to string.
- - if method_id is acceptable by regular expression on line 2
-than regular expression parses 3 groups of data from method_id 
-finder_type symbol variable will be :first if it is called just find
-or find_first, if it is called find_all or find_last then finder_type will be simply :all or :last.
- - if there is bang at the end of method call then bang variable will be set to true, on line 4.
- - In order to find which conditions for find method; second part of parsing $2 will be split into array. So if it is find_by_name_and_title
-then conditions hash will have keys name and title , their values will be the order of them.
+ - Line 1 turns method name to string.
+ - If method_id is acceptable by the regular expression on line 2
+then the regular expression parses two groups of data from the method_id (all or last). If method_id is empty then it will be assigned as :first. 
+ - If there is a bang at the end of the method call then the bang variable will be set to true, on line 4.
+ - In order to find the conditions for find method the second part of parsing $2 will be split into an array. So if it is find_by_name_and_title
+then the conditions hash will have keys name and title, their values will be the order of them.
 
 ```sh
         result = find(finder_type, :conditions => conditions)
 ```
-Here is the simple part , once finder_type and conditions information is parsed then calls find method on [Mongoid] gem and saves returned information to result variable.
+Here is the simple part: once the finder_type and conditions information is parsed then it calls the find method on the [Mongoid] gem and saves the returned information to result.
 
 ------
-
-###Conculusion
-
-I tried to explain usage of meta programming at [Mongoid dynamic finder] gem, i think it is a simple example of using method missing. 
-
-Activerecords gem has also dynamic finders, and its very complicated source code to dive in. Thats why i prefered this simple example. 
-
-----
 
 **Article by [M.Cenk Ayberkin]**
 
